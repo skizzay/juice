@@ -1,6 +1,7 @@
 package io.nuvolo.juice.infrastructure.file;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class TextStorage {
     private final BoxDimensions dimensions;
@@ -9,6 +10,7 @@ public class TextStorage {
     public TextStorage(BoxDimensions dimensions) {
         this.dimensions = dimensions;
         this.text = new ArrayList<>(dimensions.size());
+        this.text.addAll(Collections.nCopies(dimensions.size(), '\0'));
     }
 
     public void setText(String text, Point position, BoxDimensions dimensions) {
@@ -24,7 +26,7 @@ public class TextStorage {
             final int startIndex = indexOf(new Point(startPosition.x(), i));
             final int endIndex = indexOf(new Point(endPosition.x(), i));
             setText(text, startIndex, endIndex);
-            text = text.substring(dimensions.width());
+            text = text.substring(Math.min(dimensions.width(), text.length()));
         }
     }
 

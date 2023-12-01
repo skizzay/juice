@@ -1,15 +1,15 @@
 package io.nuvolo.juice.infrastructure.file;
 
 import io.nuvolo.juice.business.model.FieldName;
-import io.nuvolo.juice.business.model.WriteableField;
+import io.nuvolo.juice.business.model.ReadWriteField;
 
-public class WriteableTextBox implements WriteableField {
+public class TextBoxField implements ReadWriteField {
     private final FieldName fieldName;
     private final TextStorage storage;
     private final Point position;
     private final BoxDimensions dimensions;
 
-    public WriteableTextBox(FieldName fieldName, TextStorage storage, Point position, BoxDimensions dimensions) {
+    public TextBoxField(FieldName fieldName, TextStorage storage, Point position, BoxDimensions dimensions) {
         this.fieldName = fieldName;
         this.storage = storage;
         this.position = position;
@@ -27,5 +27,10 @@ public class WriteableTextBox implements WriteableField {
             throw new IllegalArgumentException("Value is too long");
         }
         storage.setText(value, position, dimensions);
+    }
+
+    @Override
+    public String getValue() {
+        return storage.getText(position, dimensions);
     }
 }

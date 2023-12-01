@@ -91,12 +91,12 @@ class BasicScreenTest {
     }
 
     @Test
-    public void submitRequest_givenUnknownRequestName_throws() {
+    public void performAction_givenUnknownActionName_throws() {
         // Arrange
         final ActionName actionName = new ActionName("actionName");
         final BasicScreen target = createBasicScreen();
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> target.submitRequest(actionName));
+        assertThrows(IllegalArgumentException.class, () -> target.performAction(actionName));
     }
 }

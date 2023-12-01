@@ -56,7 +56,7 @@ public class JuiceStepDefinitions {
     @When("I submit a(n) {string} request")
     public void submitRequest(String requestName) {
         userInterface.getCurrentScreen()
-                .submitRequest(ActionName.of(requestName));
+                .performAction(ActionName.of(requestName));
     }
 
     @Then("Field {string} has been set to {string}")

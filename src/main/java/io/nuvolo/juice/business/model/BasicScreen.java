@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
-public class BasicScreen extends MappedContainer implements Screen {
+public class BasicScreen extends BasicContainer implements Screen {
     private final ScreenName name;
     private final Map<ScreenName, Action> navigation;
     private final Map<ActionName, Action> requests;
@@ -36,7 +36,7 @@ public class BasicScreen extends MappedContainer implements Screen {
     }
 
     @Override
-    public void submitRequest(ActionName name) {
+    public void performAction(ActionName name) {
         Objects.requireNonNull(name, "Request name cannot be null");
         if (!requests.containsKey(name)) {
             throw new IllegalArgumentException("Unknown request: " + name);
