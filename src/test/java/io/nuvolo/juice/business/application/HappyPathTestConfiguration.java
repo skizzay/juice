@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,21 +18,32 @@ import java.util.Map;
 @DirtiesContext
 public class HappyPathTestConfiguration {
     @Bean
-    public Screen startingScreen(@Qualifier("startingScreenFields") Collection<? extends ReadWriteField> fields, @Qualifier("requests") Collection<Action> requests, Map<ScreenName, Action> navigations) {
+    public Screen startingScreen(@Qualifier("startingScreenFields") Collection<? extends ReadWriteField> fields, @Qualifier("requests") Collection<Action> requests) {
         final BasicScreenBuilder builder = new BasicScreenBuilder(new ScreenName("Starting Screen"));
         fields.forEach(f -> builder.addReadWriteField(f.getFieldName(), f));
         requests.forEach(request -> builder.addRequest(request.getName(), request));
-        navigations.forEach(builder::addNavigableScreen);
         return builder.build();
     }
 
     @Bean
-    public ScreenNavigator screenNavigator(Screen... screens) {
-        final GraphBasedScreenNavigator navigator = new GraphBasedScreenNavigator();
+    public List<Navigation> navigationList() {
+        return List.of(
+                new Navigation(null, ScreenName.of("Screen 1"), Action.noOp(ActionName.of("Screen 1")))
+        );
+    }
+
+    @Bean
+    public Map<ScreenName, Screen> screensTable(Screen... screens) {
+        final Map<ScreenName, Screen> screenMap = new HashMap<>();
         for (final Screen screen : screens) {
-            navigator.addScreen(screen);
+            screenMap.put(screen.getName(), screen);
         }
-        return navigator;
+        return screenMap;
+    }
+
+    @Bean
+    public ScreenNavigator navigationTable(Map<ScreenName, Screen> screens, Iterable<Navigation> navigations) {
+        return new GraphBasedScreenNavigator(screens, NavigationTable.from(screens.keySet(), navigations));
     }
     
     @Bean
@@ -46,15 +58,7 @@ public class HappyPathTestConfiguration {
                 Map.of(),
                 Map.of(),
                 Map.of(),
-                Map.of(),
                 Map.of()
-        );
-    }
-
-    @Bean
-    public Map<ScreenName, Action> navigations(@Qualifier("screen-1-navigation") Action screen1Navigation) {
-        return Map.of(
-                new ScreenName("Screen 1"), screen1Navigation
         );
     }
 

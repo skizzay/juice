@@ -13,7 +13,11 @@ class GraphTest {
     private final List<Graph.Edge<Node>> edges = new ArrayList<>();
 
     private Graph<Node> createGraph() {
-        return new Graph<>(edges);
+        final Graph<Node> graph = new Graph<>();
+        for (final Graph.Edge<Node> edge : edges) {
+            graph.addEdge(edge.source(), edge.target());
+        }
+        return graph;
     }
 
     @Test

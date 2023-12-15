@@ -6,7 +6,6 @@ import java.util.Objects;
 
 public class BasicScreenBuilder {
     private final ScreenName name;
-    private final Map<ScreenName, Action> navigation = new HashMap<>();
     private final Map<FieldName, ReadableField> readableFields = new HashMap<>();
     private final Map<FieldName, WriteableField> writeableFields = new HashMap<>();
     private final Map<ActionName, Action> requests = new HashMap<>();
@@ -37,12 +36,6 @@ public class BasicScreenBuilder {
         writeableFields.put(name, field);
         return this;
     }
-    public BasicScreenBuilder addNavigableScreen(ScreenName screenName, Action action) {
-        Objects.requireNonNull(screenName, "Screen name cannot be null");
-        Objects.requireNonNull(action, "Action cannot be null");
-        navigation.put(screenName, action);
-        return this;
-    }
 
     public BasicScreenBuilder addRequest(ActionName actionName, Action action) {
         Objects.requireNonNull(actionName, "Action name cannot be null");
@@ -52,6 +45,6 @@ public class BasicScreenBuilder {
     }
 
     public BasicScreen build() {
-        return new BasicScreen(name, navigation, requests, readableFields, writeableFields, Map.of());
+        return new BasicScreen(name, requests, readableFields, writeableFields, Map.of());
     }
 }

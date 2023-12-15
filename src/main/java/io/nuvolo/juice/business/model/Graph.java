@@ -18,11 +18,9 @@ public class Graph<T> {
         void visitationFinished(Map<T, T> predecessors);
     }
 
-    public Graph(List<Edge<T>> edges) {
-        for (final Edge<T> edge : edges) {
-            nodes.computeIfAbsent(edge.source(), k -> new ArrayList<>()).add(edge.target());
-            nodes.computeIfAbsent(edge.target(), k -> new ArrayList<>());
-        }
+    public void addEdge(T source, T target) {
+        nodes.computeIfAbsent(source, k -> new ArrayList<>()).add(target);
+        nodes.computeIfAbsent(target, k -> new ArrayList<>());
     }
 
     public List<T> getNeighbors(T node) {

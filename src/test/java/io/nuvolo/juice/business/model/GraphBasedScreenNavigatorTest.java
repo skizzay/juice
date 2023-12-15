@@ -1,137 +1,105 @@
 package io.nuvolo.juice.business.model;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
+
 class GraphBasedScreenNavigatorTest {
-    private record Node(String value) {}
+    private final NavigationTable navigationTable = new NavigationTable();
+    private final Map<ScreenName, Screen> screens = mockScreens(
+            ScreenName.of("screen1"),
+            ScreenName.of("screen2"),
+            ScreenName.of("screen3")
+    );
+
+    private static Screen mockScreen(ScreenName name) {
+        final Screen screen = mock(Screen.class);
+        when(screen.getName()).thenReturn(name);
+        return screen;
+    }
+
+    private static Map<ScreenName, Screen> mockScreens(ScreenName... names) {
+        final Map<ScreenName, Screen> screens = new HashMap<>();
+        for (final ScreenName name : names) {
+            screens.put(name, mockScreen(name));
+        }
+        return screens;
+    }
 
     private GraphBasedScreenNavigator createNavigator() {
-        return new GraphBasedScreenNavigator();
-    }
-
-    @Test
-    void getScreen_givenScreenExists_returnsScreen() {
-        // Arrange
-        final GraphBasedScreenNavigator navigator = createNavigator();
-        final Screen screen = mock(Screen.class);
-        when(screen.getName()).thenReturn(new ScreenName("screen"));
-        navigator.addScreen(screen);
-
-        // Act
-        navigator.addScreen(screen);
-        final Screen result = navigator.getScreen(new ScreenName("screen")).orElseThrow();
-
-        // Assert
-        assertEquals(screen, result);
-    }
-
-    @Test
-    void getScreen_givenScreenDoesNotExist_returnsEmpty() {
-        // Arrange
-        final GraphBasedScreenNavigator navigator = createNavigator();
-        final Screen screen = mock(Screen.class);
-        when(screen.getName()).thenReturn(new ScreenName("screen"));
-        navigator.addScreen(screen);
-
-        // Act
-        navigator.addScreen(screen);
-        final var result = navigator.getScreen(new ScreenName("screen2"));
-
-        // Assert
-        assertTrue(result.isEmpty());
+        return new GraphBasedScreenNavigator(screens, navigationTable);
     }
 
     @Test
     void navigate_givenUnknownSourceScreen_throws() {
         // Arrange
         final GraphBasedScreenNavigator navigator = createNavigator();
-        final Screen screen1 = mock(Screen.class);
-        when(screen1.getName()).thenReturn(new ScreenName("screen1"));
-        when(screen1.getDirectlyNavigableScreens()).thenReturn(List.of(new ScreenName("screen2")));
-        final Screen screen2 = mock(Screen.class);
-        when(screen2.getName()).thenReturn(new ScreenName("screen2"));
-        when(screen2.getDirectlyNavigableScreens()).thenReturn(List.of());
-        navigator.addScreen(screen2);
+        final Screen source = mock(Screen.class);
+        when(source.getName()).thenReturn(new ScreenName("unknown source"));
+        final ScreenName targetName = ScreenName.of("screen2");
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(screen1, new ScreenName("screen2")));
+        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(source, targetName));
     }
 
     @Test
     void navigate_givenUnknownTargetScreenName_throws() {
         // Arrange
         final GraphBasedScreenNavigator navigator = createNavigator();
-        final Screen screen1 = mock(Screen.class);
-        when(screen1.getName()).thenReturn(new ScreenName("screen1"));
-        when(screen1.getDirectlyNavigableScreens()).thenReturn(List.of(new ScreenName("screen2")));
-        final Screen screen2 = mock(Screen.class);
-        when(screen2.getName()).thenReturn(new ScreenName("screen2"));
-        when(screen2.getDirectlyNavigableScreens()).thenReturn(List.of());
-        navigator.addScreen(screen1);
-        navigator.addScreen(screen2);
+        final Screen source = screens.get(ScreenName.of("screen1"));
+        final ScreenName targetName = ScreenName.of("unknown target");
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(screen1, new ScreenName("screen3")));
+        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(source, targetName));
     }
 
     @Test
     void navigate_givenNoPathBetweenScreens_throws() {
         // Arrange
         final GraphBasedScreenNavigator navigator = createNavigator();
-        final Screen screen1 = mock(Screen.class);
-        when(screen1.getName()).thenReturn(new ScreenName("screen1"));
-        when(screen1.getDirectlyNavigableScreens()).thenReturn(List.of());
-        final Screen screen2 = mock(Screen.class);
-        when(screen2.getName()).thenReturn(new ScreenName("screen2"));
-        when(screen2.getDirectlyNavigableScreens()).thenReturn(List.of());
-        navigator.addScreen(screen1);
-        navigator.addScreen(screen2);
+        final Screen source = screens.get(ScreenName.of("screen1"));
+        final ScreenName targetName = ScreenName.of("screen2");
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(screen1, new ScreenName("screen2")));
+        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(source, targetName));
     }
 
     @Test
     void navigate_givenCircularPathBetweenScreens_returnsSelf() {
         // Arrange
         final GraphBasedScreenNavigator navigator = createNavigator();
-        final Screen screen1 = mock(Screen.class);
-        when(screen1.getName()).thenReturn(new ScreenName("screen1"));
-        when(screen1.getDirectlyNavigableScreens()).thenReturn(List.of(new ScreenName("screen1")));
-        navigator.addScreen(screen1);
+        final Screen source = screens.get(ScreenName.of("screen1"));
+        final ScreenName targetName = source.getName();
 
         // Act & Assert
-        final Screen result = navigator.navigate(screen1, new ScreenName("screen1"));
+        final Screen result = navigator.navigate(source, targetName);
 
         // Assert
-        assertEquals(screen1, result);
+        assertEquals(source, result);
     }
 
     @Test
     void navigate_givenValidScreen_returnsScreen() {
         // Arrange
         final GraphBasedScreenNavigator navigator = createNavigator();
-        final Screen screen1 = mock(Screen.class);
-        when(screen1.getName()).thenReturn(new ScreenName("screen1"));
-        when(screen1.getDirectlyNavigableScreens()).thenReturn(List.of(new ScreenName("screen2")));
-        final Screen screen2 = mock(Screen.class);
-        when(screen2.getName()).thenReturn(new ScreenName("screen2"));
-        when(screen2.getDirectlyNavigableScreens()).thenReturn(List.of());
-        navigator.addScreen(screen1);
-        navigator.addScreen(screen2);
+        final Screen source = screens.get(ScreenName.of("screen1"));
+        final ScreenName targetName = ScreenName.of("screen2");
+        navigationTable.addNavigation(source.getName(), targetName, Action.noOp());
 
         // Act
-        navigator.addScreen(screen1);
-        navigator.addScreen(screen2);
-        final Screen result = navigator.navigate(screen1, new ScreenName("screen2"));
+        final Screen result = navigator.navigate(source, targetName);
 
         // Assert
-        assertEquals(screen2, result);
+        assertEquals(screens.get(targetName), result);
     }
 }

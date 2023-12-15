@@ -7,6 +7,10 @@ public record ScreenName(String name) {
         Objects.requireNonNull(name);
     }
 
+    public static ScreenName of(String value) {
+        return new ScreenName(value);
+    }
+
     @Override
     public String toString() {
         return name;
