@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,9 +20,22 @@ class BasicUserInterfaceTest {
     }
 
     @Test
-    void getCurrentScreen_returnsStartingScreen() {
+    void getCurrentScreen_beforeNavigatingToStartingScreen_returnsNull() {
         // Arrange
         final BasicUserInterface target = createTarget();
+
+        // Act
+        final Screen actual = target.getCurrentScreen();
+
+        // Assert
+        assertNull(actual);
+    }
+
+    @Test
+    void getCurrentScreen_afterNavigatingToStartingScreen_returnsStartingScreen() {
+        // Arrange
+        final BasicUserInterface target = createTarget();
+        target.navigateToStartingScreen();
 
         // Act
         final Screen actual = target.getCurrentScreen();
@@ -34,6 +48,7 @@ class BasicUserInterfaceTest {
     void getCurrentScreen_afterNavigation_returnsNewScreen() {
         // Arrange
         final BasicUserInterface target = createTarget();
+        target.navigateToStartingScreen();
         final ScreenName screenName = new ScreenName("screen name");
         final Screen newScreen = mock(Screen.class);
         when(screenNavigator.navigate(startingScreen, screenName)).thenReturn(newScreen);

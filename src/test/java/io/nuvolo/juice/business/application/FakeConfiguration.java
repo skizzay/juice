@@ -2,6 +2,7 @@ package io.nuvolo.juice.business.application;
 
 import io.nuvolo.juice.business.model.Action;
 import io.nuvolo.juice.business.model.ActionName;
+import io.nuvolo.juice.business.model.Field;
 import io.nuvolo.juice.business.model.FieldName;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +17,7 @@ import java.util.List;
 @Profile("fake")
 public class FakeConfiguration {
     @Bean("startingScreenFields")
-    public Collection<FakeField> startingScreenFields() {
+    public Collection<Field> startingScreenFields() {
         return List.of(
                 new FakeField(FieldName.of("alpha")),
                 new FakeField(FieldName.of("bravo")),

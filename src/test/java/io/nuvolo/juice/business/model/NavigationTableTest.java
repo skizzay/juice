@@ -9,6 +9,7 @@ class NavigationTableTest {
         return new NavigationTable();
     }
 
+
     @Test
     void getNavigations_withoutNavigations_isEmpty() {
         // Arrange
@@ -25,8 +26,8 @@ class NavigationTableTest {
     void getNavigations_withNavigations_returnsNavigations() {
         // Arrange
         final NavigationTable target = createTarget();
-        target.addNavigation(ScreenName.of("source1"), ScreenName.of("target1"), Action.noOp());
-        target.addNavigation(ScreenName.of("source2"), ScreenName.of("target2"), Action.noOp());
+        target.addNavigation(new Navigation(ScreenName.of("source1"), ScreenName.of("target1"), Action.noOp()));
+        target.addNavigation(new Navigation(ScreenName.of("source2"), ScreenName.of("target2"), Action.noOp()));
 
         // Act
         final var actual = target.getNavigations().toList();
@@ -43,10 +44,10 @@ class NavigationTableTest {
     void addNavigation_givenDuplicate_throws() {
         // Arrange
         final NavigationTable target = createTarget();
-        target.addNavigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp());
+        target.addNavigation(new Navigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp()));
 
         // Act
-        final var exception = assertThrows(IllegalArgumentException.class, () -> target.addNavigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp()));
+        final var exception = assertThrows(IllegalArgumentException.class, () -> target.addNavigation(new Navigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp())));
 
         // Assert
         assertEquals("Navigation already exists from 'source1' to 'target'", exception.getMessage());
@@ -68,7 +69,7 @@ class NavigationTableTest {
     void getNavigationAction_givenUnknownSource_isEmpty() {
         // Arrange
         final NavigationTable target = createTarget();
-        target.addNavigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp());
+        target.addNavigation(new Navigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp()));
 
         // Act
         final var actual = target.getNavigationAction(ScreenName.of("unknown"), ScreenName.of("target"));
@@ -81,7 +82,7 @@ class NavigationTableTest {
     void getNavigationAction_givenUnknownTarget_isEmpty() {
         // Arrange
         final NavigationTable target = createTarget();
-        target.addNavigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp());
+        target.addNavigation(new Navigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp()));
 
         // Act
         final var actual = target.getNavigationAction(ScreenName.of("source1"), ScreenName.of("unknown"));
@@ -94,7 +95,7 @@ class NavigationTableTest {
     void getNavigationAction_givenKnownValidation_isPresent() {
         // Arrange
         final NavigationTable target = createTarget();
-        target.addNavigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp());
+        target.addNavigation(new Navigation(ScreenName.of("source1"), ScreenName.of("target"), Action.noOp()));
 
         // Act
         final var actual = target.getNavigationAction(ScreenName.of("source1"), ScreenName.of("target"));

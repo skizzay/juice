@@ -6,8 +6,7 @@ import java.util.Objects;
 
 public class BasicScreenBuilder {
     private final ScreenName name;
-    private final Map<FieldName, ReadableField> readableFields = new HashMap<>();
-    private final Map<FieldName, WriteableField> writeableFields = new HashMap<>();
+    private final Map<FieldName, Field> fields = new HashMap<>();
     private final Map<ActionName, Action> requests = new HashMap<>();
 
     public BasicScreenBuilder(ScreenName name) {
@@ -15,36 +14,21 @@ public class BasicScreenBuilder {
         this.name = name;
     }
 
-    public BasicScreenBuilder addReadableField(FieldName name, ReadableField field) {
-        Objects.requireNonNull(name, "Field name cannot be null");
+    public BasicScreenBuilder addField(Field field) {
         Objects.requireNonNull(field, "Field cannot be null");
-        readableFields.put(name, field);
+        Objects.requireNonNull(field.getFieldName(), "Field name cannot be null");
+        fields.put(field.getFieldName(), field);
         return this;
     }
 
-    public BasicScreenBuilder addWriteableField(FieldName name, WriteableField field) {
-        Objects.requireNonNull(name, "Field name cannot be null");
-        Objects.requireNonNull(field, "Field cannot be null");
-        writeableFields.put(name, field);
-        return this;
-    }
-
-    public <T extends ReadableField & WriteableField> BasicScreenBuilder addReadWriteField(FieldName name, T field) {
-        Objects.requireNonNull(name, "Field name cannot be null");
-        Objects.requireNonNull(field, "Field cannot be null");
-        readableFields.put(name, field);
-        writeableFields.put(name, field);
-        return this;
-    }
-
-    public BasicScreenBuilder addRequest(ActionName actionName, Action action) {
-        Objects.requireNonNull(actionName, "Action name cannot be null");
+    public BasicScreenBuilder addRequest(Action action) {
         Objects.requireNonNull(action, "Action cannot be null");
-        requests.put(actionName, action);
+        Objects.requireNonNull(action.getActionName(), "Action name cannot be null");
+        requests.put(action.getActionName(), action);
         return this;
     }
 
     public BasicScreen build() {
-        return new BasicScreen(name, requests, readableFields, writeableFields, Map.of());
+        return new BasicScreen(name, requests, fields, Map.of());
     }
 }

@@ -18,17 +18,17 @@ import java.util.Map;
 @DirtiesContext
 public class HappyPathTestConfiguration {
     @Bean
-    public Screen startingScreen(@Qualifier("startingScreenFields") Collection<? extends ReadWriteField> fields, @Qualifier("requests") Collection<Action> requests) {
+    public Screen startingScreen(@Qualifier("startingScreenFields") Collection<? extends Field> fields, @Qualifier("requests") Collection<Action> requests) {
         final BasicScreenBuilder builder = new BasicScreenBuilder(new ScreenName("Starting Screen"));
-        fields.forEach(f -> builder.addReadWriteField(f.getFieldName(), f));
-        requests.forEach(request -> builder.addRequest(request.getName(), request));
+        fields.forEach(builder::addField);
+        requests.forEach(builder::addRequest);
         return builder.build();
     }
 
     @Bean
     public List<Navigation> navigationList() {
         return List.of(
-                new Navigation(null, ScreenName.of("Screen 1"), Action.noOp(ActionName.of("Screen 1")))
+                new Navigation(Navigation.GLOBAL_SOURCE, ScreenName.of("Screen 1"), Action.noOp(ActionName.of("Screen 1")))
         );
     }
 
@@ -36,30 +36,29 @@ public class HappyPathTestConfiguration {
     public Map<ScreenName, Screen> screensTable(Screen... screens) {
         final Map<ScreenName, Screen> screenMap = new HashMap<>();
         for (final Screen screen : screens) {
-            screenMap.put(screen.getName(), screen);
+            screenMap.put(screen.getScreenName(), screen);
         }
         return screenMap;
     }
 
     @Bean
     public ScreenNavigator navigationTable(Map<ScreenName, Screen> screens, Iterable<Navigation> navigations) {
-        return new GraphBasedScreenNavigator(screens, NavigationTable.from(screens.keySet(), navigations));
+        return new GraphBasedScreenNavigator(screens, NavigationTable.from(navigations));
     }
     
     @Bean
     public UserInterface userInterface(@Qualifier("startingScreen") Screen startingScreen, ScreenNavigator screenNavigator) {
-        return new BasicUserInterface(startingScreen, screenNavigator);
+        final UserInterface result = new BasicUserInterface(startingScreen, screenNavigator);
+        result.navigateToStartingScreen();
+        return result;
     }
 
     @Bean
     public Screen screen1() {
-        return new BasicScreen(
-                new ScreenName("Screen 1"),
-                Map.of(),
-                Map.of(),
-                Map.of(),
-                Map.of()
-        );
+        return new BasicScreenBuilder(ScreenName.of("Screen 1"))
+                .addField(new FakeField(FieldName.of("Field 1")))
+                .addRequest(Action.noOp(ActionName.of("Action 1")))
+                .build();
     }
 
     @Bean("new-order")

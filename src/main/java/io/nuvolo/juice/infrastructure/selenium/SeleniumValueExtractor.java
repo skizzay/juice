@@ -1,6 +1,7 @@
 package io.nuvolo.juice.infrastructure.selenium;
 
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
 public interface SeleniumValueExtractor {
     String extractValue(WebElement webElement);
@@ -13,7 +14,15 @@ public interface SeleniumValueExtractor {
         return fromAttribute("value");
     }
 
+    static SeleniumValueExtractor fromCheckedAttribute() {
+        return fromAttribute("checked");
+    }
+
     static SeleniumValueExtractor fromText() {
         return WebElement::getText;
+    }
+
+    static SeleniumValueExtractor fromSelectedOption() {
+        return webElement -> new Select(webElement).getFirstSelectedOption().getText();
     }
 }

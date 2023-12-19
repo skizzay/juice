@@ -16,16 +16,16 @@ import java.util.List;
 @DirtiesContext
 @Profile("selenium")
 public class SeleniumConfiguration {
+    private final WebDriver webDriver = ChromeDriver.builder()
+            .build();
     @Bean
     public WebDriver webDriver() {
-        final WebDriver webDriver = ChromeDriver.builder()
-                .build();
         webDriver.get("https://duckduckgo.com");
         return webDriver;
     }
 
     @Bean("startingScreenFields")
-    public Collection<ReadWriteField> seleniumStartingScreenFields(SeleniumElementFinder elementFinder) {
+    public Collection<Field> seleniumStartingScreenFields(SeleniumElementFinder elementFinder) {
         return List.of(
                 new SeleniumReadWriteField(FieldName.of("alpha"), elementFinder, SeleniumValueExtractor.fromValueAttribute(), ValueValidator.alwaysValid()),
                 new FakeField(FieldName.of("bravo")),

@@ -9,12 +9,15 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BasicContainerTest {
     @Mock private ReadableField readableField;
     @Mock private WriteableField writeableField;
-    @Mock private Container container;
+    @Mock private ContainerField container;
+    @Mock private Table table;
+    @Mock private Table.Cell cell;
 
     private static final class CustomField implements ReadWriteField {
         private final FieldName fieldName;
@@ -42,39 +45,20 @@ class BasicContainerTest {
 
     private BasicContainer createTarget() {
         return new BasicContainer(Map.of(
-                new FieldName("readableField"), readableField
-        ), Map.of(
-                new FieldName("writeableField"), writeableField
-        ), Map.of(
-                new FieldName("container"), container
+                FieldName.of("readableField"), readableField,
+                FieldName.of("writeableField"), writeableField,
+                FieldName.of("container"), container,
+                FieldName.of("table"), table
         ));
     }
 
     @Test
-    void constructor_givenNullReadableFields_throwsException() {
+    void constructor_givenNullFields_throwsException() {
         // Act
-        final Throwable result = assertThrows(NullPointerException.class, () -> new BasicContainer(null, Map.of(), Map.of()));
+        final Throwable result = assertThrows(NullPointerException.class, () -> new BasicContainer(null));
 
         // Assert
-        assertEquals("Readable fields cannot be null", result.getMessage());
-    }
-
-    @Test
-    void constructor_givenNullWriteableFields_throwsException() {
-        // Act
-        final Throwable result = assertThrows(NullPointerException.class, () -> new BasicContainer(Map.of(), null, Map.of()));
-
-        // Assert
-        assertEquals("Writeable fields cannot be null", result.getMessage());
-    }
-
-    @Test
-    void constructor_givenNullContainers_throwsException() {
-        // Act
-        final Throwable result = assertThrows(NullPointerException.class, () -> new BasicContainer(Map.of(), Map.of(), null));
-
-        // Assert
-        assertEquals("Containers cannot be null", result.getMessage());
+        assertEquals("Fields cannot be null", result.getMessage());
     }
 
     @Test
@@ -115,6 +99,18 @@ class BasicContainerTest {
     }
 
     @Test
+    void getReadableField_givenNonreadableFieldName_isEmpty() {
+        // Arrange
+        final BasicContainer target = createTarget();
+
+        // Act
+        final var result = target.getReadableField(new FieldName("writeableField"));
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void getWriteableField_givenKnownFieldName_returnsField() {
         // Arrange
         final BasicContainer target = createTarget();
@@ -152,12 +148,24 @@ class BasicContainerTest {
     }
 
     @Test
+    void getWriteableField_givenNonwriteableFieldName_isEmpty() {
+        // Arrange
+        final BasicContainer target = createTarget();
+
+        // Act
+        final var result = target.getWriteableField(new FieldName("readableField"));
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void getContainer_givenKnownFieldName_returnsField() {
         // Arrange
         final BasicContainer target = createTarget();
 
         // Act
-        final Optional<Container> result = target.getContainer(new FieldName("container"));
+        final Optional<ContainerField> result = target.getContainer(new FieldName("container"));
 
         // Assert
         assertTrue(result.isPresent());
@@ -170,7 +178,7 @@ class BasicContainerTest {
         final BasicContainer target = createTarget();
 
         // Act
-        final Optional<Container> result = target.getContainer(new FieldName("unknown"));
+        final Optional<ContainerField> result = target.getContainer(new FieldName("unknown"));
 
         // Assert
         assertTrue(result.isEmpty());
@@ -193,12 +201,64 @@ class BasicContainerTest {
         // Arrange
         final FieldName fieldName = new FieldName("customField");
         final CustomField customField = new CustomField(fieldName);
-        final BasicContainer target = new BasicContainer(Map.of(fieldName, customField), Map.of(fieldName, customField), Map.of());
+        final BasicContainer target = new BasicContainer(Map.of(fieldName, customField));
 
         // Act
-        final Optional<CustomField> result = target.getReadableField(fieldName, CustomField.class);
+        final Optional<CustomField> result = target.getField(fieldName, CustomField.class);
 
         // Assert
         assertTrue(result.isPresent());
+    }
+
+    @Test
+    void getTable_givenKnownFieldName_returnsField() {
+        // Arrange
+        final BasicContainer target = createTarget();
+
+        // Act
+        final Optional<Table> result = target.getTable(new FieldName("table"));
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(table, result.get());
+    }
+
+    @Test
+    void getTable_givenUnknownFieldName_returnsEmpty() {
+        // Arrange
+        final BasicContainer target = createTarget();
+
+        // Act
+        final Optional<Table> result = target.getTable(new FieldName("unknown"));
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getTable_givenNullFieldName_throwsException() {
+        // Arrange
+        final BasicContainer target = createTarget();
+
+        // Act
+        final Throwable result = assertThrows(NullPointerException.class, () -> target.getTable(null));
+
+        // Assert
+        assertEquals("Field name cannot be null", result.getMessage());
+    }
+
+    @Test
+    void getField_givenTableCellReference_returnsTableCell() {
+        // Arrange
+        final BasicContainer target = createTarget();
+        final FieldName fieldName = FieldName.of("table[1,2]");
+        when(table.getCell(1, 2)).thenReturn(cell);
+
+        // Act
+        final Optional<Field> result = target.getField(fieldName);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(cell, result.get());
     }
 }

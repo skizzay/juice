@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public interface Action {
-    ActionName getName();
+    ActionName getActionName();
 
     void execute(Screen currentScreen);
 
@@ -13,7 +13,7 @@ public interface Action {
         Objects.requireNonNull(action, "Action cannot be null");
         return new Action() {
             @Override
-            public ActionName getName() {
+            public ActionName getActionName() {
                 return name;
             }
 
@@ -55,7 +55,7 @@ public interface Action {
             if (!first) {
                 name.append(",");
             }
-            name.append(action.getName());
+            name.append(action.getActionName());
             first = false;
         }
         name.append("]");

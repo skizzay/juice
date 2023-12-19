@@ -6,4 +6,5 @@ public interface UserInterface {
         return screenClass.cast(getCurrentScreen());
     }
     void navigateTo(ScreenName screenName);
+    void navigateToStartingScreen();
 }

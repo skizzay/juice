@@ -10,12 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class BasicScreenTest {
     private final ScreenName screenName = new ScreenName("screenName");
     private final HashMap<ActionName, Action> requests = new HashMap<>();
-    private final HashMap<FieldName, ReadableField> readableFields = new HashMap<>();
-    private final HashMap<FieldName, WriteableField> writeableFields = new HashMap<>();
+    private final HashMap<FieldName, Field> fields = new HashMap<>();
     private final HashMap<FieldName, Container> containers = new HashMap<>();
 
     private BasicScreen createBasicScreen() {
-        return new BasicScreen(screenName, requests, readableFields, writeableFields, containers);
+        return new BasicScreen(screenName, requests, fields, containers);
     }
 
     @Test
@@ -24,7 +23,7 @@ class BasicScreenTest {
         final BasicScreen basicScreen = createBasicScreen();
 
         // Act
-        final var name = basicScreen.getName();
+        final var name = basicScreen.getScreenName();
 
         // Assert
         assertEquals(screenName, name);

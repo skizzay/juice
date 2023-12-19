@@ -22,12 +22,12 @@ class ActionTest {
     @Test
     void getName() {
         // Arrange
-        when(action1.getName()).thenReturn(new ActionName("action1"));
-        when(action2.getName()).thenReturn(new ActionName("action2"));
+        when(action1.getActionName()).thenReturn(new ActionName("action1"));
+        when(action2.getActionName()).thenReturn(new ActionName("action2"));
         final Action target = createTarget();
 
         // Act
-        final ActionName result = target.getName();
+        final ActionName result = target.getActionName();
 
         // Assert
         assertEquals(new ActionName("Action Sequence[action1,action2]"), result);

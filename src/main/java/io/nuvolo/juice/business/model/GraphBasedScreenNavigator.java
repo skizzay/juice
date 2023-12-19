@@ -18,7 +18,7 @@ public class GraphBasedScreenNavigator implements ScreenNavigator {
         table.getNavigations().forEach(navigation -> {
             if (navigation.isNavigableFromAll()) {
                 for (final Screen screen : screens.values()) {
-                    result.addEdge(screen.getName(), navigation.target());
+                    result.addEdge(screen.getScreenName(), navigation.target());
                 }
             } else {
                 result.addEdge(navigation.source(), navigation.target());
@@ -31,13 +31,13 @@ public class GraphBasedScreenNavigator implements ScreenNavigator {
     public Screen navigate(Screen source, ScreenName target) {
         Objects.requireNonNull(source);
         Objects.requireNonNull(target);
-        if (source.getName().equals(target)) {
+        if (source.getScreenName().equals(target)) {
             return source;
         }
         else {
-            final List<ScreenName> path = graph.get().getShortestPath(source.getName(), target);
+            final List<ScreenName> path = graph.get().getShortestPath(source.getScreenName(), target);
             if (path.isEmpty()) {
-                throw new IllegalArgumentException("No path from " + source.getName() + " to " + target);
+                throw new IllegalArgumentException("No path from " + source.getScreenName() + " to " + target);
             } else {
                 return navigate(source, path);
             }
@@ -54,15 +54,10 @@ public class GraphBasedScreenNavigator implements ScreenNavigator {
 
             @Override
             public void accept(ScreenName screenName) {
-                table.getNavigationAction(source.getName(), screenName).ifPresentOrElse(
-                        action -> {
-                            action.execute(source);
-                            source = screens.get(screenName);
-                        },
-                        () -> {
-                            throw new IllegalArgumentException("No navigation action found for screen " + screenName);
-                        }
-                );
+                table.getNavigationAction(source.getScreenName(), screenName)
+                        .orElseThrow(() -> new IllegalArgumentException("No navigation action from " + source.getScreenName() + " to " + screenName))
+                        .execute(source);
+                source = screens.get(screenName);
             }
         }
         final var traverse = new ScreenNameTraverse(source);

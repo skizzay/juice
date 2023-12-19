@@ -1,12 +1,12 @@
 Feature: Explore the various happy path scenarios for the framework
 
   Scenario: Setting field values as individual steps and check them as a table (Given/Then statements)
-    Given Field "alpha" is set to "lorem ipsum"
-    And Field "bravo" is set to "12.3"
-    And Field "charlie" is set to 42
-    And Field "delta" is set to -35.3
-    And Field "echo" is set to true
-    Then The following fields have been set:
+    Given field "alpha" is set to "lorem ipsum"
+    And field "bravo" is set to "12.3"
+    And field "charlie" is set to 42
+    And field "delta" is set to -35.3
+    And field "echo" is set to true
+    Then the following fields have been set:
       | alpha   | lorem ipsum |
       | bravo   | 12.3        |
       | charlie | 42          |
@@ -14,17 +14,17 @@ Feature: Explore the various happy path scenarios for the framework
       | echo    | true        |
 
   Scenario: Setting field values as a table and check them as individual steps (Given/Then statements)
-    Given The following fields are set:
+    Given the following fields are set:
       | alpha   | lorem ipsum |
       | bravo   | 12.3        |
       | charlie | 42          |
       | delta   | -35.3       |
       | echo    | true        |
-    Then Field "alpha" has been set to "lorem ipsum"
-    And Field "bravo" has been set to "12.3"
-    And Field "charlie" has been set to 42
-    And Field "delta" has been set to "-35.3"
-    And Field "echo" has been set to true
+    Then field "alpha" has been set to "lorem ipsum"
+    And field "bravo" has been set to "12.3"
+    And field "charlie" has been set to 42
+    And field "delta" has been set to "-35.3"
+    And field "echo" has been set to true
 
   Scenario: We can switch to a different screen
     Given I am on the "Screen 1" screen
@@ -39,3 +39,23 @@ Feature: Explore the various happy path scenarios for the framework
       | Cancel-Replace  |
       | New Transaction |
       | Update Account  |
+
+  Scenario: We can verify comparisons
+    Given the following fields are set:
+      | alpha   | 42 |
+      | bravo   | 12 |
+      | charlie | 25 |
+    Then field "alpha" is greater than field "bravo"
+    And field "charlie" is equal to 25
+
+  Scenario: We can match against a regular expression
+    Given field "alpha" is set to "lorem ipsum"
+    And field "bravo" is set to "ipsum lorem"
+    Then field "alpha" matches "lorem \w+"
+    And field "bravo" does not match "lorem \w+"
+
+  Scenario: We can verify that a field is empty
+    Given field "alpha" is set to "lorem ipsum"
+    And field "bravo" is set to ""
+    Then field "alpha" is not empty
+    And field "bravo" is empty

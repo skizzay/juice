@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Graph<T> {
     public record Edge<T>(T source, T target) {}
-    private final Map<T, List<T>> nodes = new HashMap<>();
+    private final Map<T, Collection<T>> nodes = new HashMap<>();
 
     public enum VisitationResult {
         CONTINUE,
@@ -19,8 +19,8 @@ public class Graph<T> {
     }
 
     public void addEdge(T source, T target) {
-        nodes.computeIfAbsent(source, k -> new ArrayList<>()).add(target);
-        nodes.computeIfAbsent(target, k -> new ArrayList<>());
+        nodes.computeIfAbsent(source, k -> new HashSet<>()).add(target);
+        nodes.computeIfAbsent(target, k -> new HashSet<>());
     }
 
     public List<T> getNeighbors(T node) {

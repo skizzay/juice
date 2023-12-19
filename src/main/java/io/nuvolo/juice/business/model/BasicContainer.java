@@ -3,35 +3,26 @@ package io.nuvolo.juice.business.model;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BasicContainer implements Container {
-    private final Map<FieldName, ReadableField> readableFields;
-    private final Map<FieldName, WriteableField> writeableFields;
-    private final Map<FieldName, Container> containers;
+    private static final Pattern TABLE_CELL_PATTERN = Pattern.compile("([^]]+)\\[(\\d+),(\\d+)]");
+    private final Map<FieldName, Field> fields;
 
-    public BasicContainer(Map<FieldName, ReadableField> readableFields,
-                          Map<FieldName, WriteableField> writeableFields,
-                          Map<FieldName, Container> containers) {
-        this.readableFields = Objects.requireNonNull(readableFields, "Readable fields cannot be null");
-        this.writeableFields = Objects.requireNonNull(writeableFields, "Writeable fields cannot be null");
-        this.containers = Objects.requireNonNull(containers, "Containers cannot be null");
+    public BasicContainer(Map<FieldName, Field> fields) {
+        this.fields = Objects.requireNonNull(fields, "Fields cannot be null");
     }
 
     @Override
-    public Optional<ReadableField> getReadableField(FieldName name) {
+    public Optional<Field> getField(FieldName name) {
         Objects.requireNonNull(name, "Field name cannot be null");
-        return Optional.ofNullable(readableFields.get(name));
-    }
-
-    @Override
-    public Optional<WriteableField> getWriteableField(FieldName name) {
-        Objects.requireNonNull(name, "Field name cannot be null");
-        return Optional.ofNullable(writeableFields.get(name));
-    }
-
-    @Override
-    public Optional<Container> getContainer(FieldName name) {
-        Objects.requireNonNull(name, "Field name cannot be null");
-        return Optional.ofNullable(containers.get(name));
+        final Matcher matcher = TABLE_CELL_PATTERN.matcher(name.name());
+        if (matcher.matches()) {
+            return getTable(FieldName.of(matcher.group(1)))
+                    .map(table -> table.getCell(Integer.parseInt(matcher.group(2)), Integer.parseInt(matcher.group(3))));
+        } else {
+            return Optional.ofNullable(fields.get(name));
+        }
     }
 }

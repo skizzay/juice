@@ -3,18 +3,24 @@ package io.nuvolo.juice.business.model;
 import java.util.Optional;
 
 public interface Container {
-    Optional<ReadableField> getReadableField(FieldName name);
-    default <T extends ReadableField> Optional<T> getReadableField(FieldName name, Class<T> type) {
-        return getReadableField(name).filter(type::isInstance).map(type::cast);
+    Optional<Field> getField(FieldName name);
+    default <T extends Field> Optional<T> getField(FieldName name, Class<T> type) {
+        return getField(name).filter(type::isInstance).map(type::cast);
     }
 
-    Optional<WriteableField> getWriteableField(FieldName name);
-    default <T extends WriteableField> Optional<T> getWriteableField(FieldName name, Class<T> type) {
-        return getWriteableField(name).filter(type::isInstance).map(type::cast);
+    default Optional<ReadableField> getReadableField(FieldName name) {
+        return getField(name, ReadableField.class);
     }
 
-    Optional<Container> getContainer(FieldName name);
-    default <T extends Container> Optional<T> getContainer(FieldName name, Class<T> type) {
-        return getContainer(name).filter(type::isInstance).map(type::cast);
+    default Optional<WriteableField> getWriteableField(FieldName name) {
+        return getField(name, WriteableField.class);
+    }
+
+    default Optional<ContainerField> getContainer(FieldName name) {
+        return getField(name, ContainerField.class);
+    }
+
+    default Optional<Table> getTable(FieldName name) {
+        return getField(name, Table.class);
     }
 }

@@ -9,12 +9,11 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SeleniumElementFinderTest {
-    private WebDriver webDriver;
+    private final WebDriver webDriver = ChromeDriver.builder()
+                .build();
 
     @BeforeEach
     void setUp() {
-        webDriver = ChromeDriver.builder()
-                .build();
         webDriver.get("https://duckduckgo.com");
     }
 

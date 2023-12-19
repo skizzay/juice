@@ -5,12 +5,10 @@ import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.nuvolo.juice.business.model.ActionName;
-import io.nuvolo.juice.business.model.FieldName;
-import io.nuvolo.juice.business.model.ScreenName;
-import io.nuvolo.juice.business.model.UserInterface;
+import io.nuvolo.juice.business.model.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 public class JuiceStepDefinitions {
@@ -22,10 +20,20 @@ public class JuiceStepDefinitions {
 
     @ParameterType(value="true|false|True|False|TRUE|FALSE", name="boolean")
     public boolean booleanType(String value) {
-        return Boolean.parseBoolean(value);
+        return Boolean.parseBoolean(Character.toUpperCase(value.charAt(0)) + value.substring(1).toLowerCase());
     }
 
-    @Given("Field {string} is set to {string}")
+    @ParameterType(value="ordered|unordered|contains", name="tablematching")
+    public TableMatching tableMatching(String value) {
+        return TableMatching.Type.valueOf(value.toUpperCase());
+    }
+
+    @ParameterType(value="equal to|greater than|less than|greater than or equal to|less than or equal to|not equal to", name="comparison")
+    public NumberComparison numberComparison(String value) {
+        return NumberComparison.Type.valueOf(value.toUpperCase().replace(" ", "_"));
+    }
+
+    @Given("field {string} is set to {string}")
     public void setField(String fieldName, String value) {
         userInterface.getCurrentScreen()
                 .getWriteableField(FieldName.of(fieldName))
@@ -33,17 +41,17 @@ public class JuiceStepDefinitions {
                 .setValue(value);
     }
 
-    @Given("Field {string} is set to {boolean}")
+    @Given("field {string} is set to {boolean}")
     public void setField(String fieldName, boolean value) {
         setField(fieldName, Boolean.toString(value));
     }
 
-    @Given("Field {string} is set to {bigdecimal}")
+    @Given("field {string} is set to {bigdecimal}")
     public void setField(String fieldName, BigDecimal value) {
         setField(fieldName, value.toString());
     }
 
-    @Given("The following fields are set:")
+    @Given("the following fields are set:")
     public void setFields(DataTable dataTable) {
         dataTable.asMap().forEach(this::setField);
     }
@@ -59,37 +67,100 @@ public class JuiceStepDefinitions {
                 .performAction(ActionName.of(requestName));
     }
 
-    @Then("Field {string} has been set to {string}")
-    public void checkField(String fieldName, String expectedValue) {
-        final String actualValue = userInterface.getCurrentScreen()
-                .getReadableField(new FieldName(fieldName))
+    public String getFieldValue(FieldName fieldName) {
+        Objects.requireNonNull(fieldName, "fieldName must not be null");
+        return userInterface.getCurrentScreen()
+                .getReadableField(fieldName)
                 .orElseThrow(() -> new IllegalArgumentException("Field " + fieldName + " not found on the current screen"))
                 .getValue();
+    }
+
+    @Then("field {string} is {comparison} {bigdecimal}")
+    public void checkField(String fieldName, NumberComparison comparison, BigDecimal expectedValue) {
+        final String actualValue = getFieldValue(FieldName.of(fieldName));
+        if (!comparison.compare(new BigDecimal(actualValue), expectedValue)) {
+            throw new AssertionError("Field " + fieldName + " is not " + comparison + " " + expectedValue + " but " + actualValue);
+        }
+    }
+
+    @Then("field {string} is {comparison} field {string}")
+    public void checkField(String fieldName1, NumberComparison comparison, String fieldName2) {
+        final String fieldValue1 = getFieldValue(FieldName.of(fieldName1));
+        final String fieldValue2 = getFieldValue(FieldName.of(fieldName2));
+        comparison.compare(new BigDecimal(fieldValue1), new BigDecimal(fieldValue2));
+    }
+
+    @Then("field {string} has been set to {string}")
+    public void checkField(String fieldName, String expectedValue) {
+        final String actualValue = getFieldValue(FieldName.of(fieldName));
         if (!expectedValue.equals(actualValue)) {
             throw new AssertionError("Field " + fieldName + " has not been set to " + expectedValue + " but to " + actualValue);
         }
     }
 
-    @Then("Field {string} has been set to {boolean}")
+    @Then("field {string} has been set to {boolean}")
     public void checkField(String fieldName, boolean expectedValue) {
         checkField(fieldName, Boolean.toString(expectedValue));
     }
 
-    @Then("Field {string} has been set to {bigdecimal}")
+    @Then("field {string} has been set to {bigdecimal}")
     public void checkField(String fieldName, BigDecimal expectedValue) {
         checkField(fieldName, expectedValue.toString());
     }
 
-    @Then("The following fields have been set:")
+    @Then("field {string} matches {string}")
+    public void checkFieldMatchesRegex(String fieldName, String regex) {
+        final String actualValue = getFieldValue(FieldName.of(fieldName));
+        if (!actualValue.matches(regex)) {
+            throw new AssertionError("Field " + fieldName + " does not match " + regex + " but is " + actualValue);
+        }
+    }
+
+    @Then("field {string} does not match {string}")
+    public void checkFieldNotMatchesRegex(String fieldName, String regex) {
+        final String actualValue = getFieldValue(FieldName.of(fieldName));
+        if (actualValue.matches(regex)) {
+            throw new AssertionError("Field " + fieldName + " matches " + regex + " but should not");
+        }
+    }
+
+    @Then("field {string} is empty")
+    public void checkForBlankField(String fieldName) {
+        final String actualValue = getFieldValue(FieldName.of(fieldName));
+        if (!actualValue.isBlank()) {
+            throw new AssertionError("Field " + fieldName + " is not blank but to " + actualValue);
+        }
+    }
+
+    @Then("field {string} is not empty")
+    public void checkForNotBlankField(String fieldName) {
+        final String actualValue = getFieldValue(FieldName.of(fieldName));
+        if (actualValue.isBlank()) {
+            throw new AssertionError("Field " + fieldName + " is blank");
+        }
+    }
+
+    @Then("the following fields have been set:")
     public void checkFields(DataTable dataTable) {
         dataTable.asMap().forEach(this::checkField);
     }
 
     @Then("I should be on the {string} screen")
     public void checkScreen(String expectedScreenName) {
-        final String actualScreenName = userInterface.getCurrentScreen().getName().toString();
+        final String actualScreenName = userInterface.getCurrentScreen().getScreenName().toString();
         if (!expectedScreenName.equals(actualScreenName)) {
             throw new AssertionError("Screen name is " + actualScreenName + " but should be " + expectedScreenName);
         }
+    }
+
+    @Then("the {string} table should match - {tablematching}:")
+    public void checkTable(String tableName, DataTable expectedTable, TableMatching tableMatching) {
+        final List<List<String>> actualTable = userInterface.getCurrentScreen()
+                .getTable(FieldName.of(tableName))
+                .orElseThrow(() -> new IllegalArgumentException("Table " + tableName + " not found on the current screen"))
+                .readRows()
+                .map(Table::asCellValues)
+                .toList();
+        tableMatching.match(DataTable.create(actualTable), expectedTable);
     }
 }

@@ -24,7 +24,7 @@ class GraphBasedScreenNavigatorTest {
 
     private static Screen mockScreen(ScreenName name) {
         final Screen screen = mock(Screen.class);
-        when(screen.getName()).thenReturn(name);
+        when(screen.getScreenName()).thenReturn(name);
         return screen;
     }
 
@@ -45,7 +45,7 @@ class GraphBasedScreenNavigatorTest {
         // Arrange
         final GraphBasedScreenNavigator navigator = createNavigator();
         final Screen source = mock(Screen.class);
-        when(source.getName()).thenReturn(new ScreenName("unknown source"));
+        when(source.getScreenName()).thenReturn(new ScreenName("unknown source"));
         final ScreenName targetName = ScreenName.of("screen2");
 
         // Act & Assert
@@ -79,7 +79,7 @@ class GraphBasedScreenNavigatorTest {
         // Arrange
         final GraphBasedScreenNavigator navigator = createNavigator();
         final Screen source = screens.get(ScreenName.of("screen1"));
-        final ScreenName targetName = source.getName();
+        final ScreenName targetName = source.getScreenName();
 
         // Act & Assert
         final Screen result = navigator.navigate(source, targetName);
@@ -94,7 +94,22 @@ class GraphBasedScreenNavigatorTest {
         final GraphBasedScreenNavigator navigator = createNavigator();
         final Screen source = screens.get(ScreenName.of("screen1"));
         final ScreenName targetName = ScreenName.of("screen2");
-        navigationTable.addNavigation(source.getName(), targetName, Action.noOp());
+        navigationTable.addNavigation(new Navigation(source.getScreenName(), targetName, Action.noOp()));
+
+        // Act
+        final Screen result = navigator.navigate(source, targetName);
+
+        // Assert
+        assertEquals(screens.get(targetName), result);
+    }
+
+    @Test
+    void navigate_givenSourceIsValidFromAll_returnsScreen() {
+        // Arrange
+        final GraphBasedScreenNavigator navigator = createNavigator();
+        final Screen source = screens.get(ScreenName.of("screen1"));
+        final ScreenName targetName = ScreenName.of("screen2");
+        navigationTable.addNavigation(new Navigation(ScreenName.of("*"), targetName, Action.noOp()));
 
         // Act
         final Screen result = navigator.navigate(source, targetName);
