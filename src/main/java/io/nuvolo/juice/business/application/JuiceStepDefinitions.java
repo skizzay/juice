@@ -15,7 +15,7 @@ public class JuiceStepDefinitions {
     private final UserInterface userInterface;
 
     public JuiceStepDefinitions(UserInterface userInterface) {
-        this.userInterface = Objects.requireNonNull(userInterface);
+        this.userInterface = Objects.requireNonNull(userInterface, "user interface cannot be null");
     }
 
     @ParameterType(value="true|false|True|False|TRUE|FALSE", name="boolean")
@@ -153,13 +153,13 @@ public class JuiceStepDefinitions {
         }
     }
 
-    @Then("the {string} table should match - {tablematching}:")
-    public void checkTable(String tableName, DataTable expectedTable, TableMatching tableMatching) {
+    @Then("the {string} table should match - {tablematching}")
+    public void checkTable(String tableName, TableMatching tableMatching, DataTable expectedTable) {
         final List<List<String>> actualTable = userInterface.getCurrentScreen()
                 .getTable(FieldName.of(tableName))
                 .orElseThrow(() -> new IllegalArgumentException("Table " + tableName + " not found on the current screen"))
                 .readRows()
-                .map(Table::asCellValues)
+                .map(TableUtilities::asCellValues)
                 .toList();
         tableMatching.match(DataTable.create(actualTable), expectedTable);
     }

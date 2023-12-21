@@ -18,10 +18,6 @@ public interface Table extends Field {
     interface ReadWriteCell extends ReadableCell, WriteableCell {
     }
 
-    static List<String> asCellValues(List<? extends ReadableCell> cells) {
-        return cells.stream().map(ReadableCell::getValue).toList();
-    }
-
     interface Row<T extends Cell> extends List<T> {
         int getRow();
     }

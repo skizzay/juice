@@ -17,7 +17,7 @@ public abstract class AbstractCell implements Table.Cell {
         }
     }
 
-    abstract FieldName getTableName();
+    protected abstract FieldName getTableName();
 
     @Override
     public FieldName getFieldName() {

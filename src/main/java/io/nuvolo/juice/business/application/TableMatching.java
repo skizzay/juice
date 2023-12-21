@@ -23,8 +23,8 @@ public interface TableMatching {
         CONTAINS {
             @Override
             public void match(DataTable actual, DataTable expected) {
-                final var actualRows = actual.asLists();
-                if (!new HashSet<>(actualRows).containsAll(expected.asLists())) {
+                final var actualRows = actual.cells();
+                if (!new HashSet<>(actualRows).containsAll(expected.cells())) {
                     throw new AssertionError("Expected rows [" + expected + "] were not found in actual rows [" + actualRows + "]");
                 }
             }

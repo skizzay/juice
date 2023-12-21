@@ -12,7 +12,7 @@ class AbstractCellTest {
         }
 
         @Override
-        FieldName getTableName() {
+        public FieldName getTableName() {
             return FieldName.of("test");
         }
     }

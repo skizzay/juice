@@ -32,7 +32,7 @@ class AbstractTableTest {
             }
 
             @Override
-            FieldName getTableName() {
+            public FieldName getTableName() {
                 return TestTable.this.getFieldName();
             }
         }
@@ -259,7 +259,7 @@ class AbstractTableTest {
         target.writeRows().flatMap(List::stream).forEach(cell -> cell.setValue("test"));
 
         // Act
-        final var result = target.readRows().map(Table::asCellValues).flatMap(List::stream).toList();
+        final var result = target.readRows().map(TableUtilities::asCellValues).flatMap(List::stream).toList();
 
         // Assert
         assertEquals(target.size(), result.size());

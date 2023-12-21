@@ -59,3 +59,19 @@ Feature: Explore the various happy path scenarios for the framework
     And field "bravo" is set to ""
     Then field "alpha" is not empty
     And field "bravo" is empty
+
+  Scenario: We can make perform table reconciliation
+#    Using assumption that table is populated from backend system. This uses fictitious fields for testing the capability.
+    Then the "tango" table should match - ordered
+      | employee id | first name | last name | hire date  |
+      | 1234        | Jane       | Smith     | 2023-12-20 |
+      | 4321        | John       | Rambo     | 1947-12-05 |
+      | 9876        | John       | McClane   | 1955-03-19 |
+    And the "tango" table should match - unordered
+      | employee id | first name | last name | hire date  |
+      | 1234        | Jane       | Smith     | 2023-12-20 |
+      | 9876        | John       | McClane   | 1955-03-19 |
+      | 4321        | John       | Rambo     | 1947-12-05 |
+    And the "tango" table should match - contains
+      | employee id | first name | last name | hire date  |
+      | 4321        | John       | Rambo     | 1947-12-05 |

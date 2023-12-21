@@ -23,9 +23,6 @@ public class TextBoxField implements ReadWriteField {
 
     @Override
     public void setValue(String value) {
-        if (value.length() > dimensions.size()) {
-            throw new IllegalArgumentException("Value is too long");
-        }
         storage.setText(value, position, dimensions);
     }
 

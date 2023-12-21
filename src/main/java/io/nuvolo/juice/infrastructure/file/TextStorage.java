@@ -14,11 +14,16 @@ public class TextStorage {
     }
 
     public void setText(String text, Point position, BoxDimensions dimensions) {
-        final Point endPosition = new Point(position.x() + dimensions.width(), position.y() + dimensions.height());
-        if (text.length() < dimensions.size()) {
-            text = text + "\0".repeat(dimensions.size() - text.length());
+        if (text.length() > dimensions.size()) {
+            throw new IllegalArgumentException("Value is too large for table cell");
         }
-        setText(text, position, endPosition);
+        else {
+            final Point endPosition = new Point(position.x() + dimensions.width(), position.y() + dimensions.height());
+            if (text.length() < dimensions.size()) {
+                text = text + "\0".repeat(dimensions.size() - text.length());
+            }
+            setText(text, position, endPosition);
+        }
     }
 
     private void setText(String text, Point startPosition, Point endPosition) {

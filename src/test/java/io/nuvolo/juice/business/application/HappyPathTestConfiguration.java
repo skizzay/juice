@@ -2,6 +2,7 @@ package io.nuvolo.juice.business.application;
 
 import io.cucumber.spring.CucumberContextConfiguration;
 import io.nuvolo.juice.business.model.*;
+import io.nuvolo.juice.infrastructure.file.TextConfiguration;
 import io.nuvolo.juice.infrastructure.selenium.SeleniumConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @CucumberContextConfiguration
-@SpringBootTest(classes = {HappyPathTestConfiguration.class, FakeConfiguration.class, SeleniumConfiguration.class})
+@SpringBootTest(classes = {HappyPathTestConfiguration.class, FakeConfiguration.class, SeleniumConfiguration.class, TextConfiguration.class})
 @DirtiesContext
 public class HappyPathTestConfiguration {
     @Bean
