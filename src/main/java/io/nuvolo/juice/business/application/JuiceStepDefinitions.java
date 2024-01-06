@@ -33,11 +33,23 @@ public class JuiceStepDefinitions {
         return NumberComparison.Type.valueOf(value.toUpperCase().replace(" ", "_"));
     }
 
+    private static IllegalArgumentException notFound(String type, FieldName fieldName) {
+        return new IllegalArgumentException(type + " " + fieldName + " not found on the current screen");
+    }
+
+    private static IllegalArgumentException fieldNotFound(FieldName fieldName) {
+        return notFound("Field", fieldName);
+    }
+
+    private static IllegalArgumentException tableNotFound(FieldName tableName) {
+        return notFound("Table", tableName);
+    }
+
     @Given("field {string} is set to {string}")
     public void setField(String fieldName, String value) {
         userInterface.getCurrentScreen()
                 .getWriteableField(FieldName.of(fieldName))
-                .orElseThrow(() -> new IllegalArgumentException("Field " + fieldName + " not found on the current screen"))
+                .orElseThrow(() -> fieldNotFound(FieldName.of(fieldName)))
                 .setValue(value);
     }
 
@@ -51,6 +63,12 @@ public class JuiceStepDefinitions {
         setField(fieldName, value.toString());
     }
 
+    @Given("field {string} is set from screen {string} field {string} value")
+    public void setFieldFromScreen(String fieldName, String screenName, String screenFieldName) {
+        final String value = userInterface.getPreviousState(ScreenName.of(screenName)).get(FieldName.of(screenFieldName));
+        setField(fieldName, value);
+    }
+
     @Given("the following fields are set:")
     public void setFields(DataTable dataTable) {
         dataTable.asMap().forEach(this::setField);
@@ -58,20 +76,19 @@ public class JuiceStepDefinitions {
 
     @Given("I am on the {string} screen")
     public void navigateToScreen(String screenName) {
-        userInterface.navigateTo(new ScreenName(screenName));
+        userInterface.navigateTo(ScreenName.of(screenName));
     }
 
     @When("I submit a(n) {string} request")
     public void submitRequest(String requestName) {
-        userInterface.getCurrentScreen()
-                .performAction(ActionName.of(requestName));
+        userInterface.performAction(ActionName.of(requestName));
     }
 
     public String getFieldValue(FieldName fieldName) {
         Objects.requireNonNull(fieldName, "fieldName must not be null");
         return userInterface.getCurrentScreen()
                 .getReadableField(fieldName)
-                .orElseThrow(() -> new IllegalArgumentException("Field " + fieldName + " not found on the current screen"))
+                .orElseThrow(() -> fieldNotFound(fieldName))
                 .getValue();
     }
 
@@ -87,7 +104,9 @@ public class JuiceStepDefinitions {
     public void checkField(String fieldName1, NumberComparison comparison, String fieldName2) {
         final String fieldValue1 = getFieldValue(FieldName.of(fieldName1));
         final String fieldValue2 = getFieldValue(FieldName.of(fieldName2));
-        comparison.compare(new BigDecimal(fieldValue1), new BigDecimal(fieldValue2));
+        if (!comparison.compare(new BigDecimal(fieldValue1), new BigDecimal(fieldValue2))) {
+            throw new AssertionError("Field " + fieldName1 + " is not " + comparison + " " + fieldName2 + " but " + fieldValue1);
+        }
     }
 
     @Then("field {string} has been set to {string}")
@@ -106,6 +125,13 @@ public class JuiceStepDefinitions {
     @Then("field {string} has been set to {bigdecimal}")
     public void checkField(String fieldName, BigDecimal expectedValue) {
         checkField(fieldName, expectedValue.toString());
+    }
+
+    @Then("field {string} has been set to screen {string} field {string} value")
+    public void checkField(String fieldName, String screenName, String screenFieldName) {
+        final String expectedValue = userInterface.getPreviousState(ScreenName.of(screenName))
+                .get(FieldName.of(screenFieldName));
+        checkField(fieldName, expectedValue);
     }
 
     @Then("field {string} matches {string}")
@@ -157,7 +183,7 @@ public class JuiceStepDefinitions {
     public void checkTable(String tableName, TableMatching tableMatching, DataTable expectedTable) {
         final List<List<String>> actualTable = userInterface.getCurrentScreen()
                 .getTable(FieldName.of(tableName))
-                .orElseThrow(() -> new IllegalArgumentException("Table " + tableName + " not found on the current screen"))
+                .orElseThrow(() -> tableNotFound(FieldName.of(tableName)))
                 .readRows()
                 .map(TableUtilities::asCellValues)
                 .toList();

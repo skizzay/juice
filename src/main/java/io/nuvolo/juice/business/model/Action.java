@@ -1,14 +1,14 @@
 package io.nuvolo.juice.business.model;
 
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public interface Action {
     ActionName getActionName();
 
-    void execute(Screen currentScreen);
+    void execute(UserInterface userInterface, Screen currentScreen);
 
-    static Action from(ActionName name, Consumer<Screen> action) {
+    static Action from(ActionName name, BiConsumer<UserInterface, Screen> action) {
         Objects.requireNonNull(name, "Action name cannot be null");
         Objects.requireNonNull(action, "Action cannot be null");
         return new Action() {
@@ -18,14 +18,14 @@ public interface Action {
             }
 
             @Override
-            public void execute(Screen currentScreen) {
-                action.accept(currentScreen);
+            public void execute(UserInterface userInterface, Screen currentScreen) {
+                action.accept(userInterface, currentScreen);
             }
         };
     }
 
     static Action noOp(ActionName name) {
-        return from(name, screen -> {
+        return from(name, (userInterface, screen) -> {
             // Do nothing
         });
     }
@@ -34,14 +34,19 @@ public interface Action {
         return noOp(ActionName.of("No Op"));
     }
 
+    static Action navigateTo(ScreenName screenName) {
+        Objects.requireNonNull(screenName, "Screen name cannot be null");
+        return from(ActionName.of("Navigate to " + screenName), (userInterface, screen) -> userInterface.navigateTo(screenName));
+    }
+
     static Action of(ActionName name, Action... actions) {
         if (actions.length == 0) {
             throw new IllegalArgumentException("At least one action must be provided");
         }
         else {
-            return from(name, screen -> {
+            return from(name, (userInterface, screen) -> {
                 for (final Action action : actions) {
-                    action.execute(screen);
+                    action.execute(userInterface, screen);
                 }
             });
         }

@@ -28,9 +28,16 @@ public class GraphBasedScreenNavigator implements ScreenNavigator {
     }
 
     @Override
-    public Screen navigate(Screen source, ScreenName target) {
-        Objects.requireNonNull(source);
-        Objects.requireNonNull(target);
+    public Optional<Screen> getScreen(ScreenName screenName) {
+        Objects.requireNonNull(screenName, "screenName must not be null");
+        return Optional.ofNullable(screens.get(screenName));
+    }
+
+    @Override
+    public Screen navigate(UserInterface userInterface, Screen source, ScreenName target) {
+        Objects.requireNonNull(userInterface, "userInterface must not be null");
+        Objects.requireNonNull(source, "source must not be null");
+        Objects.requireNonNull(target, "target must not be null");
         if (source.getScreenName().equals(target)) {
             return source;
         }
@@ -39,12 +46,12 @@ public class GraphBasedScreenNavigator implements ScreenNavigator {
             if (path.isEmpty()) {
                 throw new IllegalArgumentException("No path from " + source.getScreenName() + " to " + target);
             } else {
-                return navigate(source, path);
+                return navigate(userInterface, source, path);
             }
         }
     }
 
-    private Screen navigate(Screen source, List<ScreenName> path) {
+    private Screen navigate(UserInterface userInterface, Screen source, List<ScreenName> path) {
         class ScreenNameTraverse implements Consumer<ScreenName> {
             private Screen source;
 
@@ -52,12 +59,21 @@ public class GraphBasedScreenNavigator implements ScreenNavigator {
                 this.source = source;
             }
 
-            @Override
-            public void accept(ScreenName screenName) {
+            private void performNavigationAction(ScreenName screenName) {
                 table.getNavigationAction(source.getScreenName(), screenName)
                         .orElseThrow(() -> new IllegalArgumentException("No navigation action from " + source.getScreenName() + " to " + screenName))
-                        .execute(source);
+                        .execute(userInterface, source);
+            }
+
+            private void updateCurrentScreenTo(ScreenName screenName) {
                 source = screens.get(screenName);
+            }
+
+            @Override
+            public void accept(ScreenName screenName) {
+                source.rememberState();
+                performNavigationAction(screenName);
+                updateCurrentScreenTo(screenName);
             }
         }
         final var traverse = new ScreenNameTraverse(source);

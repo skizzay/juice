@@ -14,6 +14,7 @@ class ActionTest {
     @Mock private Action action1;
     @Mock private Action action2;
     @Mock private Screen screen;
+    @Mock private UserInterface userInterface;
 
     private Action createTarget() {
         return Action.of(action1, action2);
@@ -39,11 +40,11 @@ class ActionTest {
         final Action target = createTarget();
 
         // Act
-        target.execute(screen);
+        target.execute(userInterface, screen);
 
         // Assert
-        verify(action1, times(1)).execute(screen);
-        verify(action2, times(1)).execute(screen);
+        verify(action1, times(1)).execute(userInterface, screen);
+        verify(action2, times(1)).execute(userInterface, screen);
     }
 
     @Test

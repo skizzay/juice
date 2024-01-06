@@ -1,17 +1,19 @@
 package io.nuvolo.juice.business.model;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class BasicScreen extends BasicContainer implements Screen {
     private final ScreenName name;
-    private final Map<ActionName, Action> requests;
+    private final Map<ActionName, Action> actions;
+    private final Map<FieldName, String> lastState = new HashMap<>();
 
-    public BasicScreen(ScreenName name, Map<ActionName, Action> requests, Map<FieldName, Field> fields,
-                       Map<FieldName, Container> containers) {
+    public BasicScreen(ScreenName name, Map<ActionName, Action> actions, Map<FieldName, Field> fields) {
         super(fields);
         this.name = Objects.requireNonNull(name, "Screen name cannot be null");
-        this.requests = requests;
+        this.actions = Objects.requireNonNull(actions, "Actions cannot be null");
     }
 
     @Override
@@ -20,13 +22,25 @@ public class BasicScreen extends BasicContainer implements Screen {
     }
 
     @Override
-    public void performAction(ActionName name) {
-        Objects.requireNonNull(name, "Request name cannot be null");
-        if (!requests.containsKey(name)) {
+    public void performAction(UserInterface userInterface, ActionName name) {
+        Objects.requireNonNull(userInterface, "User interface cannot be null");
+        Objects.requireNonNull(name, "Action name cannot be null");
+        if (!actions.containsKey(name)) {
             throw new IllegalArgumentException("Unknown request: " + name);
         } else {
-            final Action action = requests.get(name);
-            action.execute(this);
+            final Action action = actions.get(name);
+            action.execute(userInterface, this);
         }
+    }
+
+    @Override
+    public void rememberState() {
+        lastState.clear();
+        lastState.putAll(getState());
+    }
+
+    @Override
+    public Map<FieldName, String> getLastState() {
+        return Collections.unmodifiableMap(lastState);
     }
 }

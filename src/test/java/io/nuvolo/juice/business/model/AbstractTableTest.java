@@ -42,7 +42,7 @@ class AbstractTableTest {
         private final int columns;
 
         TestTable(FieldName tableName, int rows, int columns) {
-            super(tableName);
+            super(tableName, rows, columns);
             this.rows = rows;
             this.columns = columns;
             this.values = new ArrayList<>(Collections.nCopies(rows * columns, ""));

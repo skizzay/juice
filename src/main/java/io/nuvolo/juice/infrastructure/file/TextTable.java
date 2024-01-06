@@ -16,7 +16,7 @@ public class TextTable extends AbstractTable {
     private final TextStorage textStorage;
 
     public TextTable(FieldName tableName, int rows, int columns, TextStorage textStorage, Point position, BoxDimensions cellSize) {
-        super(tableName);
+        super(tableName, rows, columns);
         if (rows <= 0) {
             throw new IllegalArgumentException("rows must be greater than 0");
         }

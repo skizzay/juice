@@ -29,6 +29,6 @@ public class BasicScreenBuilder {
     }
 
     public BasicScreen build() {
-        return new BasicScreen(name, requests, fields, Map.of());
+        return new BasicScreen(name, requests, fields);
     }
 }

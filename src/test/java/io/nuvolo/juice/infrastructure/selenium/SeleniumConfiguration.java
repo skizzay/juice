@@ -45,6 +45,6 @@ public class SeleniumConfiguration {
 
     @Bean("screen-1-navigation")
     public Action screen1Navigation(SeleniumElementFinder elementFinder) {
-        return Action.from(ActionName.of("Screen 1 Navigation"), currentScreen -> SeleniumFieldUtils.click(elementFinder, FieldName.of("submit button")));
+        return Action.from(ActionName.of("Screen 1 Navigation"), (ui, currentScreen) -> SeleniumFieldUtils.click(elementFinder, FieldName.of("submit button")));
     }
 }

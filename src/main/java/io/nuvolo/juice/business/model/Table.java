@@ -1,6 +1,7 @@
 package io.nuvolo.juice.business.model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public interface Table extends Field {
@@ -78,4 +79,6 @@ public interface Table extends Field {
     default int size() {
         return Math.max(-1, getRowCount() * getColumnCount());
     }
+
+    Map<FieldName, String> getState();
 }

@@ -2,20 +2,21 @@ package io.nuvolo.juice.business.model;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-
 class GraphBasedScreenNavigatorTest {
     private final NavigationTable navigationTable = new NavigationTable();
+    @Mock
+    private UserInterface userInterface;
     private final Map<ScreenName, Screen> screens = mockScreens(
             ScreenName.of("screen1"),
             ScreenName.of("screen2"),
@@ -49,7 +50,7 @@ class GraphBasedScreenNavigatorTest {
         final ScreenName targetName = ScreenName.of("screen2");
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(source, targetName));
+        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(userInterface, source, targetName));
     }
 
     @Test
@@ -60,7 +61,7 @@ class GraphBasedScreenNavigatorTest {
         final ScreenName targetName = ScreenName.of("unknown target");
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(source, targetName));
+        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(userInterface, source, targetName));
     }
 
     @Test
@@ -71,7 +72,7 @@ class GraphBasedScreenNavigatorTest {
         final ScreenName targetName = ScreenName.of("screen2");
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(source, targetName));
+        assertThrows(IllegalArgumentException.class, () -> navigator.navigate(userInterface, source, targetName));
     }
 
     @Test
@@ -82,7 +83,7 @@ class GraphBasedScreenNavigatorTest {
         final ScreenName targetName = source.getScreenName();
 
         // Act & Assert
-        final Screen result = navigator.navigate(source, targetName);
+        final var result = navigator.navigate(userInterface, source, targetName);
 
         // Assert
         assertEquals(source, result);
@@ -97,7 +98,7 @@ class GraphBasedScreenNavigatorTest {
         navigationTable.addNavigation(new Navigation(source.getScreenName(), targetName, Action.noOp()));
 
         // Act
-        final Screen result = navigator.navigate(source, targetName);
+        final var result = navigator.navigate(userInterface, source, targetName);
 
         // Assert
         assertEquals(screens.get(targetName), result);
@@ -112,9 +113,47 @@ class GraphBasedScreenNavigatorTest {
         navigationTable.addNavigation(new Navigation(ScreenName.of("*"), targetName, Action.noOp()));
 
         // Act
-        final Screen result = navigator.navigate(source, targetName);
+        final var result = navigator.navigate(userInterface, source, targetName);
 
         // Assert
         assertEquals(screens.get(targetName), result);
+    }
+
+    @Test
+    void getScreen_givenNullScreenName_throws() {
+        // Arrange
+        final GraphBasedScreenNavigator navigator = createNavigator();
+
+        // Act
+        final var exception = assertThrows(NullPointerException.class, () -> navigator.getScreen(null));
+
+        // Assert
+        assertEquals("screenName must not be null", exception.getMessage());
+    }
+
+    @Test
+    void getScreen_givenUnknownScreenName_returnsEmpty() {
+        // Arrange
+        final GraphBasedScreenNavigator navigator = createNavigator();
+
+        // Act
+        final var result = navigator.getScreen(ScreenName.of("unknown"));
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getScreen_givenKnownScreenName_returnsScreen() {
+        // Arrange
+        final GraphBasedScreenNavigator navigator = createNavigator();
+        final ScreenName screenName = ScreenName.of("screen1");
+
+        // Act
+        final var result = navigator.getScreen(screenName);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(screens.get(screenName), result.get());
     }
 }
