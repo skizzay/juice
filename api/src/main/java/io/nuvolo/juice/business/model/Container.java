@@ -1,10 +1,11 @@
 package io.nuvolo.juice.business.model;
 
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface Container {
-    Map<FieldName, String> getState();
+    Stream<Field> getFields();
+
     Optional<Field> getField(FieldName name);
     default <T extends Field> Optional<T> getField(FieldName name, Class<T> type) {
         return getField(name).filter(type::isInstance).map(type::cast);

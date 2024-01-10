@@ -27,8 +27,6 @@ class BasicScreenTest {
     @Mock
     private Action action;
     @Mock
-    private Field field;
-    @Mock
     private ReadableField readableField;
     @Mock
     private ContainerField containerField;
@@ -44,7 +42,6 @@ class BasicScreenTest {
         actions.clear();
         actions.put(actionName, action);
         fields.clear();
-        fields.put(new FieldName("fieldName"), field);
         fields.put(readableFieldName, readableField);
         fields.put(containerFieldName, containerField);
         fields.put(tableFieldName, table);
@@ -115,13 +112,11 @@ class BasicScreenTest {
     void rememberState_givenFieldsWithReadableFields_remembersState() {
         // Arrange
         final BasicScreen target = createBasicScreen();
-        when(readableField.getFieldName()).thenReturn(readableFieldName);
-        when(readableField.getValue()).thenReturn("readable field value");
+        when(readableField.getState()).thenReturn(Map.of(readableFieldName, "readable field value"));
         final FieldName cellName = FieldName.of(tableFieldName + "[0,0]");
         when(table.getState()).thenReturn(Map.of(cellName, "cell value"));
         final FieldName subFieldName = FieldName.of(containerFieldName + ".subfield");
-        when(containerField.getFieldName()).thenReturn(containerFieldName);
-        when(containerField.getState()).thenReturn(Map.of(FieldName.of("subfield"), "container field value"));
+        when(containerField.getState()).thenReturn(Map.of(subFieldName, "container field value"));
 
         // Act
         target.rememberState();

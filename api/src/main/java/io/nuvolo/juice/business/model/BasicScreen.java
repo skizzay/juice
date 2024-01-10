@@ -1,9 +1,6 @@
 package io.nuvolo.juice.business.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class BasicScreen extends BasicContainer implements Screen {
     private final ScreenName name;
@@ -36,7 +33,9 @@ public class BasicScreen extends BasicContainer implements Screen {
     @Override
     public void rememberState() {
         lastState.clear();
-        lastState.putAll(getState());
+        getFields()
+                .map(Field::getState)
+                .forEachOrdered(lastState::putAll);
     }
 
     @Override

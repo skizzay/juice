@@ -2,6 +2,8 @@ package io.nuvolo.juice.business.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -15,6 +17,11 @@ class AbstractCellTest {
         @Override
         public FieldName getTableName() {
             return FieldName.of("test");
+        }
+
+        @Override
+        public Map<FieldName, String> getState() {
+            return Map.of();
         }
     }
 
