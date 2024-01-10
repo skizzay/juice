@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':api')
+    implementation 'org.seleniumhq.selenium:selenium-java:latest.release'
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core:latest.release'
+    testImplementation 'org.mockito:mockito-junit-jupiter:latest.release'
+    testImplementation 'io.cucumber:cucumber-junit-platform-engine:latest.release'
+    testImplementation 'org.junit.platform:junit-platform-suite:latest.release'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:latest.release'
+    testImplementation 'io.cucumber:cucumber-spring:latest.release'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jacocoTestReport {
+    dependsOn test
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8
+            }
+        }
+
+        rule {
+            includes = ['io.nuvolo.juice.business.*']
+            limit {
+                minimum = 0.9
+            }
+        }
+    }
+}

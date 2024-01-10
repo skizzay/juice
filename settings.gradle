@@ -1,2 +1,5 @@
 rootProject.name = 'juice'
-
+include 'api'
+include 'selenium'
+include 'text'
+//include 'example'
